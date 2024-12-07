@@ -73,7 +73,7 @@ Make sure your global Composer bin directory is in your system's PATH.
 ### Project Installation
 
 ```bash
-composer require mdeloughry/gcm-gen
+composer global require mdeloughry/gcm-gen
 ```
 
 ## Usage
