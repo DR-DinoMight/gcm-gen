@@ -1,0 +1,58 @@
+# Composer
+/vendor/
+composer.phar
+composer.lock
+
+# PHP
+*.log
+.php-cs-fixer.cache
+.phpunit.result.cache
+.phpunit.cache
+
+# IDEs and editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.backup
+.env.local
+.env.*.local
+
+# Build and test directories
+/build/
+/coverage/
+/dist/
+/node_modules/
+
+# Cache and logs
+/var/
+/logs/
+*.cache
+
+# Local config files
+/.config/
+config.local.php
+*.local.php
+
+# Testing
+.phpunit.result.cache
+.phpunit.cache
+coverage.xml
+*.coverage
+/coverage/
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
