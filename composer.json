@@ -9,7 +9,6 @@
             "email": "matt@deloughry.com"
         }
     ],
-    "version": "0.0.1",
     "require": {
         "php": "^8.1",
         "guzzlehttp/guzzle": "^7.0",

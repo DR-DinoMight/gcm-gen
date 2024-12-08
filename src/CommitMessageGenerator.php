@@ -42,11 +42,17 @@ class CommitMessageGenerator
             'chatgpt' => $this->generateWithChatGPT($model, $prompt, $diff),
         };
 
+        //clean up message to remove `
+        $message = str_replace('`', '', $message);
         if ($commit) {
             $this->gitOps->commit($message);
         }
 
         $this->printCommitMessage($message);
+
+        // Copy to clipboard
+        render('<div class="bg-green-500 text-white p-1 mt-2">Copying to clipboard...</div>');
+        ClipboardManager::copyToClipboard($message);
     }
 
     protected function generateWithOllama(string $model, string $prompt, string $diff): string
