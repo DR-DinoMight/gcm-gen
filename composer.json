@@ -1,6 +1,7 @@
 {
     "name": "mdeloughry/gcm-gen",
     "description": "Git Commit Message Generator",
+    "keywords": ["git", "commit", "message", "generator", "ai", "llm", "openai", "ollama"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -22,13 +23,7 @@
     "config": {
         "sort-packages": true
     },
-    "scripts": {
-        "test": "phpunit",
-        "check-style": "phpcs",
-        "fix-style": "phpcbf"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^10.0",
-        "squizlabs/php_codesniffer": "^3.7"
-    }
+    "bin": [
+        "gcm-gen"
+    ]
 }
