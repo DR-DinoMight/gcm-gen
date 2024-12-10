@@ -14,10 +14,7 @@ class ConfigManager
 
     public function __construct()
     {
-        $this->configPath = $this->getConfigPath();
-        if (!file_exists($this->configPath)) {
-            $this->createConfig();
-        }
+        $this->configPath = $_SERVER['HOME'] . '/.config/gcm-gen.config.php';
         $this->loadConfig();
     }
 
@@ -56,12 +53,67 @@ class ConfigManager
 
     protected function loadConfig(): void
     {
-        $this->config = require_once $this->configPath;
+        if (!file_exists($this->configPath)) {
+            $this->createConfig();
+            return;
+        }
+
+        $this->config = require $this->configPath;
     }
 
     protected function createConfig(): void
     {
-        // ... [Keep existing createConfig implementation] ...
+        if (!is_dir(dirname($this->configPath))) {
+            mkdir(dirname($this->configPath), 0755, true);
+        }
+
+        $defaultConfig = [
+            'provider' => 'chatgpt',
+            'ignore_files' => [
+                'vendor',
+                'node_modules',
+                'package-lock.json',
+                'yarn.lock',
+                'composer.lock',
+                'dist',
+                'build',
+                'public',
+                'storage',
+            ],
+            'ollama' => [
+                'model' => 'llama3.2',
+            ],
+            'chatgpt' => [
+                'model' => 'gpt-4',
+                'api_key' => '',
+            ],
+            'prompt' => <<<EOL
+Generate a git commit message based on the following rules:
+
+1. First line:
+    - Use imperative mood (Add not Added)
+    - Max 50 characters
+    - Format: [type] - [ticket] [description]
+    - [ticket] is optional and can be built from the branch name look for the pattern '/(?:#(\d+)|([A-Z]+-\d+))/i'
+    - [type] from branch patterns using emojis only (no branch pattern match):
+        feature/* → ✨
+        [bugfix,hotfix]/* → 🐛
+        release/* → 🔖
+        default → 🤖
+
+2. Optional body (if changes are complex):
+    - Leave one blank line after subject
+    - Create a new line at 72 characters
+    - Explain the type of change in the first line
+    - Explain what and why, not how
+    - Add BREAKING CHANGE: for breaking changes
+EOL,
+        ];
+
+        $configContent = "<?php\n\nreturn " . var_export($defaultConfig, true) . ";\n";
+        file_put_contents($this->configPath, $configContent);
+
+        $this->config = $defaultConfig;
     }
 
     public function editConfig(): void
