@@ -80,29 +80,31 @@ class GcmGen
     {
         render(<<<HTML
             <div>
-                <div class="px-1 bg-yellow-300 text-black">Usage:</div> gcm-gen <span class="text-yellow">command</span>
-            </div>
-            <div class="mt-1">
-                <div class="text-yellow mb-1">Commands:</div>
-                <div class="ml-2">
-                    <table>
-                        <tr>
-                            <td class="text-yellow pr-4">g, generate</td>
-                            <td class="text-gray">Generate a commit message</td>
-                        </tr>
-                        <tr>
-                            <td class="text-yellow pr-4">c, commit</td>
-                            <td class="text-gray">Generate a commit message and commit</td>
-                        </tr>
-                        <tr>
-                            <td class="text-yellow pr-4">config</td>
-                            <td class="text-gray">Show current configuration</td>
-                        </tr>
-                        <tr>
-                            <td class="text-yellow pr-4">config --edit</td>
-                            <td class="text-gray">Open configuration in default editor</td>
-                        </tr>
-                    </table>
+                <div>
+                    <div class="px-1 bg-yellow-300 text-black">Usage:</div> gcm-gen <span class="text-yellow">command</span>
+                </div>
+                <div class="mt-1">
+                    <div class="text-yellow mb-1">Commands:</div>
+                    <div class="ml-2">
+                        <table>
+                            <tr>
+                                <td class="text-yellow pr-4">g, generate</td>
+                                <td class="text-gray">Generate a commit message</td>
+                            </tr>
+                            <tr>
+                                <td class="text-yellow pr-4">c, commit</td>
+                                <td class="text-gray">Generate a commit message and commit</td>
+                            </tr>
+                            <tr>
+                                <td class="text-yellow pr-4">config</td>
+                                <td class="text-gray">Show current configuration</td>
+                            </tr>
+                            <tr>
+                                <td class="text-yellow pr-4">config --edit</td>
+                                <td class="text-gray">Open configuration in default editor</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
         HTML);
