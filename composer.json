@@ -24,6 +24,6 @@
         "sort-packages": true
     },
     "bin": [
-        "gcm-gen"
+        "bin/gcm-gen"
     ]
 }
