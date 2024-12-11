@@ -33,7 +33,7 @@ class ConfigManager
      */
     public function getPrompt(): string
     {
-        return trim($this->config['prompt']);
+        return isset($this->config['prompt']) ? trim($this->config['prompt']) : '';
     }
 
     /**
@@ -135,7 +135,8 @@ class ConfigManager
     public function editConfig(): void
     {
         $editor = getenv('EDITOR') ?: 'nano';
-        passthru("$editor $this->configPath", $returnCode);
+        $editorCommand = escapeshellarg($editor) . ' ' . escapeshellarg($this->configPath);
+        passthru($editorCommand, $returnCode);
 
         if ($returnCode !== 0) {
             render("<div class='text-red'>Failed to open editor. Please make sure your EDITOR environment variable is set correctly.</div>");
@@ -145,7 +146,8 @@ class ConfigManager
     public function editPrompt(): void
     {
         $editor = getenv('EDITOR') ?: 'nano';
-        passthru("$editor $this->promptPath", $returnCode);
+        $editorCommand = escapeshellarg($editor) . ' ' . escapeshellarg($this->configPath);
+        passthru($editorCommand, $returnCode);
 
         if ($returnCode !== 0) {
             render("<div class='text-red'>Failed to open editor. Please make sure your EDITOR environment variable is set correctly.</div>");

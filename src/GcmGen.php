@@ -90,7 +90,7 @@ class GcmGen
     protected function showPrompt(): void
     {
         $lines = explode("\n", $this->configManager->getPrompt());
-        $formattedLines = array_map(fn($line) => "<div class='text-blue'>$line</div>", $lines);
+        $formattedLines = array_map(fn($line) => '<div class="text-blue">' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>', $lines);
 
         render(<<<HTML
             <div>
@@ -104,7 +104,7 @@ class GcmGen
 
     private function joinLines(array $lines): string
     {
-        return implode('', $lines);
+        return implode("\n", $lines);
     }
 
     /**
