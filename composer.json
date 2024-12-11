@@ -25,5 +25,8 @@
     },
     "bin": [
         "bin/gcm-gen"
-    ]
+    ],
+    "extra": {
+        "resources-dir": "resources"
+    }
 }

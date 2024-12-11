@@ -45,6 +45,7 @@ class GcmGen
             'g', 'generate' => $this->messageGenerator->generate(),
             'c', 'commit' => $this->messageGenerator->generate(true),
             'config' => $this->handleConfig($flag),
+            'prompt' => $this->handlePrompt($flag),
             default => render("<div class='text-red'>Unknown command: $command</div>")
         };
     }
@@ -71,6 +72,39 @@ class GcmGen
             '-e', '--edit' => $this->configManager->editConfig(),
             default => $this->configManager->showConfig()
         };
+    }
+
+    /**
+     * Handle prompt command and its flags
+     *
+     * @param string $flag Command flag
+     */
+    protected function handlePrompt(string $flag): void
+    {
+        match ($flag) {
+            '-e', '--edit' => $this->configManager->editPrompt(),
+            default => $this->showPrompt()
+        };
+    }
+
+    protected function showPrompt(): void
+    {
+        $lines = explode("\n", $this->configManager->getPrompt());
+        $formattedLines = array_map(fn($line) => "<div class='text-blue'>$line</div>", $lines);
+
+        render(<<<HTML
+            <div>
+                <div class="px-1 bg-yellow-300 text-black">Current Prompt:</div>
+                <div class="mt-1 ml-2">
+                    {$this->joinLines($formattedLines)}
+                </div>
+            </div>
+        HTML);
+    }
+
+    private function joinLines(array $lines): string
+    {
+        return implode('', $lines);
     }
 
     /**
@@ -102,6 +136,14 @@ class GcmGen
                             <tr>
                                 <td class="text-yellow pr-4">config --edit</td>
                                 <td class="text-gray">Open configuration in default editor</td>
+                            </tr>
+                            <tr>
+                                <td class="text-yellow pr-4">prompt</td>
+                                <td class="text-gray">Show current prompt</td>
+                            </tr>
+                            <tr>
+                                <td class="text-yellow pr-4">prompt --edit</td>
+                                <td class="text-gray">Edit prompt in default editor</td>
                             </tr>
                         </table>
                     </div>
