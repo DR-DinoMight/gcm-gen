@@ -115,8 +115,13 @@ class ConfigManager
     protected function createConfig(): void
     {
         $starterConfigPath = dirname(__DIR__) . '/resources/starter-config.json';
-        if (!file_exists($starterConfigPath)) {
-            render("<div class='text-red'>Error: Starter config file not found</div>");
+
+        if (!is_readable($starterConfigPath)) {
+            render("<div class='text-red'>Error: Cannot read starter file</div>");
+            exit(1);
+        }
+        if (file_exists($this->configPath) && !is_writable($this->configPath)) {
+            render("<div class='text-red'>Error: Cannot write to target file</div>");
             exit(1);
         }
 
@@ -129,6 +134,12 @@ class ConfigManager
     protected function createPrompt(): void
     {
         $starterPromptPath = dirname(__DIR__) . '/resources/prompt.md';
+
+        if (!is_readable($starterPromptPath)) {
+            render("<div class='text-red'>Error: Cannot read starter prompt file</div>");
+            exit(1);
+        }
+
         if (!file_exists($starterPromptPath)) {
             render("<div class='text-red'>Error: Starter prompt file not found</div>");
             exit(1);
@@ -154,7 +165,7 @@ class ConfigManager
     public function editPrompt(): void
     {
         $editor = getenv('EDITOR') ?: 'nano';
-        $editorCommand = escapeshellarg($editor) . ' ' . escapeshellarg($this->configPath);
+        $editorCommand = escapeshellarg($editor) . ' ' . escapeshellarg($this->promptPath);
         passthru($editorCommand, $returnCode);
 
         if ($returnCode !== 0) {
