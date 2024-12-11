@@ -15,8 +15,16 @@ class ConfigManager
 
     public function __construct()
     {
-        $this->configPath = $_SERVER['HOME'] . '/.config/gcm-gen/config.json';
-        $this->promptPath = $_SERVER['HOME'] . '/.config/gcm-gen/prompt.md';
+        $home = match (true) {
+            getenv('HOME') !== false => getenv('HOME'),
+            getenv('USERPROFILE') !== false => getenv('USERPROFILE'),
+            default => $_SERVER['HOME']
+        };
+
+
+
+        $this->configPath = $home . '/.config/gcm-gen/config.json';
+        $this->promptPath = $home . '/.config/gcm-gen/prompt.md';
         $this->loadConfig();
     }
 
