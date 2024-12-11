@@ -10,11 +10,21 @@ use function Termwind\render;
 class ConfigManager
 {
     protected string $configPath;
-    protected array $config;
+    protected string $promptPath;
+    protected array $config = [];
 
     public function __construct()
     {
-        $this->configPath = $_SERVER['HOME'] . '/.config/gcm-gen.config.php';
+        $home = match (true) {
+            getenv('HOME') !== false => getenv('HOME'),
+            getenv('USERPROFILE') !== false => getenv('USERPROFILE'),
+            default => $_SERVER['HOME']
+        };
+
+
+
+        $this->configPath = $home . '/.config/gcm-gen/config.json';
+        $this->promptPath = $home . '/.config/gcm-gen/prompt.md';
         $this->loadConfig();
     }
 
@@ -27,102 +37,136 @@ class ConfigManager
     }
 
     /**
+     * Get the current prompt
+     */
+    public function getPrompt(): string
+    {
+        return isset($this->config['prompt']) ? trim($this->config['prompt']) : '';
+    }
+
+    /**
      * Display current configuration
      */
     public function showConfig(): void
     {
         render(<<<HTML
             <div>
-                <div>
-                    <span class="text-black bg-yellow-300 px-1 font-bold">Config Path:</span>
-                    <span class="text-blue">{$this->configPath}</span>
-                </div>
+                <table>
+                    <tr>
+                        <td class="text-black bg-yellow-300 px-1 font-bold pr-2">Config Path:</td>
+                        <td class="text-blue">{$this->configPath}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-black bg-yellow-300 px-1 font-bold pr-2">Prompt Path:</td>
+                        <td class="text-blue">{$this->promptPath}</td>
+                    </tr>
+                </table>
             </div>
         HTML);
         render(<<<'HTML'
             <div class="mt-1 text-black bg-yellow-300 px-1 font-bold">Current Configuration:</div>
         HTML);
-        print_r($this->config);
-    }
-
-    protected function getConfigPath(): string
-    {
-        $homedir = getenv('HOME') ?: $_SERVER['HOME'];
-        return $homedir . '/.config/gcm-gen.config.php';
+        echo json_encode($this->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     protected function loadConfig(): void
     {
+        $this->ensureConfigDirectory();
+
         if (!file_exists($this->configPath)) {
             $this->createConfig();
-            return;
         }
 
-        $this->config = require $this->configPath;
+        if (!file_exists($this->promptPath)) {
+            $this->createPrompt();
+        }
+
+        $jsonContent = file_get_contents($this->configPath);
+        if ($jsonContent === false) {
+            render("<div class='text-red'>Error: Failed to read config file</div>");
+            exit(1);
+        }
+
+        $config = json_decode($jsonContent, true);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($config)) {
+            render("<div class='text-red'>Error: Invalid config format</div>");
+            exit(1);
+        }
+
+        $promptContent = file_get_contents($this->promptPath);
+        if ($promptContent === false) {
+            render("<div class='text-red'>Error: Failed to read prompt file</div>");
+            exit(1);
+        }
+
+        $config['prompt'] = $promptContent;
+        $this->config = $config;
+    }
+
+    protected function ensureConfigDirectory(): void
+    {
+        $configDir = dirname($this->configPath);
+        if (!is_dir($configDir) && !mkdir($configDir, 0755, true)) {
+            render("<div class='text-red'>Error: Failed to create config directory</div>");
+            exit(1);
+        }
     }
 
     protected function createConfig(): void
     {
-        if (!is_dir(dirname($this->configPath))) {
-            mkdir(dirname($this->configPath), 0755, true);
+        $starterConfigPath = dirname(__DIR__) . '/resources/starter-config.json';
+
+        if (!is_readable($starterConfigPath)) {
+            render("<div class='text-red'>Error: Cannot read starter file</div>");
+            exit(1);
+        }
+        if (file_exists($this->configPath) && !is_writable($this->configPath)) {
+            render("<div class='text-red'>Error: Cannot write to target file</div>");
+            exit(1);
         }
 
-        $defaultConfig = [
-            'provider' => 'chatgpt',
-            'ignore_files' => [
-                'vendor',
-                'node_modules',
-                'package-lock.json',
-                'yarn.lock',
-                'composer.lock',
-                'dist',
-                'build',
-                'public',
-                'storage',
-            ],
-            'ollama' => [
-                'model' => 'llama3.2',
-            ],
-            'chatgpt' => [
-                'model' => 'gpt-4',
-                'api_key' => '',
-            ],
-            'prompt' => <<<EOL
-Generate a git commit message based on the following rules:
+        if (!copy($starterConfigPath, $this->configPath)) {
+            render("<div class='text-red'>Error: Failed to create config file</div>");
+            exit(1);
+        }
+    }
 
-1. First line:
-    - Use imperative mood (Add not Added)
-    - Max 50 characters
-    - Format: [type] - [ticket] [description]
-    - [ticket] is optional and can be built from the branch name look for the pattern '/(?:#(\d+)|([A-Z]+-\d+))/i'
-    - [type] from branch patterns using emojis only (no branch pattern match):
-        feature/* → ✨
-        [bugfix,hotfix]/* → 🐛
-        release/* → 🔖
-        default → 🤖
+    protected function createPrompt(): void
+    {
+        $starterPromptPath = dirname(__DIR__) . '/resources/prompt.md';
 
-2. Optional body (if changes are complex):
-    - Leave one blank line after subject
-    - Create a new line at 72 characters
-    - Explain the type of change in the first line
-    - Explain what and why, not how
-    - Add BREAKING CHANGE: for breaking changes
-EOL,
-        ];
+        if (!is_readable($starterPromptPath)) {
+            render("<div class='text-red'>Error: Cannot read starter prompt file</div>");
+            exit(1);
+        }
 
-        $configContent = "<?php\n\nreturn " . var_export($defaultConfig, true) . ";\n";
-        file_put_contents($this->configPath, $configContent);
+        if (!file_exists($starterPromptPath)) {
+            render("<div class='text-red'>Error: Starter prompt file not found</div>");
+            exit(1);
+        }
 
-        $this->config = $defaultConfig;
+        if (!copy($starterPromptPath, $this->promptPath)) {
+            render("<div class='text-red'>Error: Failed to create prompt file</div>");
+            exit(1);
+        }
     }
 
     public function editConfig(): void
     {
-        $configPath = $this->getConfigPath();
         $editor = getenv('EDITOR') ?: 'nano';
+        $editorCommand = escapeshellarg($editor) . ' ' . escapeshellarg($this->configPath);
+        passthru($editorCommand, $returnCode);
 
-        // Ensure we're running in an interactive terminal
-        passthru("$editor $configPath", $returnCode);
+        if ($returnCode !== 0) {
+            render("<div class='text-red'>Failed to open editor. Please make sure your EDITOR environment variable is set correctly.</div>");
+        }
+    }
+
+    public function editPrompt(): void
+    {
+        $editor = getenv('EDITOR') ?: 'nano';
+        $editorCommand = escapeshellarg($editor) . ' ' . escapeshellarg($this->promptPath);
+        passthru($editorCommand, $returnCode);
 
         if ($returnCode !== 0) {
             render("<div class='text-red'>Failed to open editor. Please make sure your EDITOR environment variable is set correctly.</div>");

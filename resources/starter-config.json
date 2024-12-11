@@ -1,0 +1,21 @@
+{
+    "provider": "chatgpt",
+    "ignore_files": [
+        "vendor",
+        "node_modules",
+        "package-lock.json",
+        "yarn.lock",
+        "composer.lock",
+        "dist",
+        "build",
+        "public",
+        "storage"
+    ],
+    "ollama": {
+        "model": "llama3.2"
+    },
+    "chatgpt": {
+        "model": "gpt-4",
+        "api_key": ""
+    }
+}
